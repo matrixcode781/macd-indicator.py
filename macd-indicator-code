@@ -1,0 +1,59 @@
+import pandas as pd
+import numpy as np
+
+def calculate_ema(prices, period):
+    """
+    Calculates the Exponential Moving Average (EMA) for a given list of prices.
+    """
+    return prices.ewm(span=period, adjust=False).mean()
+
+def calculate_macd(prices, fast=12, slow=26, signal=9):
+    """
+    Calculates the MACD indicator for a given list of closing prices.
+
+    Parameters:
+        prices (list or Series): List of closing prices.
+        fast (int): Period for the fast EMA. Default is 12.
+        slow (int): Period for the slow EMA. Default is 26.
+        signal (int): Period for the signal line EMA. Default is 9.
+
+    Returns:
+        DataFrame: A pandas DataFrame containing the MACD Line, Signal Line, and Histogram.
+    """
+    
+    # Convert the list to a pandas Series
+    prices = pd.Series(prices)
+    
+    # Calculate the fast and slow EMAs
+    ema_fast = calculate_ema(prices, fast)
+    ema_slow = calculate_ema(prices, slow)
+    
+    # Calculate the MACD Line
+    macd_line = ema_fast - ema_slow
+    
+    # Calculate the Signal Line
+    signal_line = calculate_ema(macd_line, signal)
+    
+    # Calculate the Histogram
+    histogram = macd_line - signal_line
+    
+    # Create a DataFrame to return all values
+    data = {
+        'MACD_Line': macd_line,
+        'Signal_Line': signal_line,
+        'Histogram': histogram
+    }
+    df = pd.DataFrame(data)
+    
+    return df
+
+# Example usage with dummy data:
+if __name__ == "__main__":
+    # Create a sample list of closing prices (e.g., for 50 days)
+    closing_prices = np.random.randn(50).cumsum() + 100  # Random walk prices
+    
+    # Calculate MACD
+    macd_data = calculate_macd(closing_prices)
+    
+    # Print the last few values
+    print(macd_data.tail())
